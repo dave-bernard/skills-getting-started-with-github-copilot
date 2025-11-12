@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
 
-  // Dummy activities + participants and rendering/signup logic
-
-  const activities = [
+  // Activities will be loaded from the server when available. We keep a
+  // small local fallback so the UI still renders if the API is unreachable.
+  let activities = [
     {
-      id: "robotics",
+      id: "Robotics Club",
       title: "Robotics Club",
       description:
         "Build, program, and compete with robots. Meetings: Wednesdays 3:30–5:00pm.",
@@ -18,23 +18,46 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "Sana Noor", email: "sana.noor@mergington.edu" },
       ],
     },
-    {
-      id: "art",
-      title: "Art Club",
-      description:
-        "Open studio time for drawing, painting, and portfolio work. Fridays 2:45–4:00pm.",
-      participants: [],
-    },
-    {
-      id: "chess",
-      title: "Chess Club",
-      description: "Weekly matches and strategy sessions. Tuesdays 3:15–4:30pm.",
-      participants: [
-        { name: "Ben Carter", email: "ben.carter@mergington.edu" },
-        { name: "Emma Rice", email: "emma.rice@mergington.edu" },
-      ],
-    },
   ];
+
+  // Convert an email localpart into a display name (used when server only
+  // returns email addresses for participants).
+  function nameFromEmail(email) {
+    if (!email) return email || "";
+    const local = email.split("@")[0] || email;
+    return local
+      .split(/[._\-]/)
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(" ");
+  }
+
+  // Fetch activities from the backend API and normalize into the local
+  // activities array shape used by the renderer.
+  async function fetchActivitiesFromServer() {
+    try {
+      const res = await fetch("/activities");
+      if (!res.ok) throw new Error(`Failed to load activities: ${res.status}`);
+      const data = await res.json();
+      // data is an object mapping activity title -> details
+      activities = Object.keys(data).map((title) => {
+        const item = data[title] || {};
+        const participants = (item.participants || []).map((email) => ({
+          name: nameFromEmail(email),
+          email,
+        }));
+        return {
+          id: title, // use title as id to match server key for signup
+          title,
+          description: item.description || "",
+          participants,
+        };
+      });
+    } catch (err) {
+      console.warn("Could not fetch activities from server, using fallback:", err);
+      showMessage("Unable to load activities from server — using fallback data", "error");
+      // keep previously defined fallback `activities` value
+    }
+  }
 
   function initialsFromName(name) {
     const parts = name.split(/\s+/).filter(Boolean);
@@ -150,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return { ok: true, activity };
   }
 
-  function handleSignup(e) {
+  async function handleSignup(e) {
     e.preventDefault();
     const emailInput = document.getElementById("email");
     const select = document.getElementById("activity");
@@ -168,20 +191,57 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const result = addParticipantToActivity(activityId, email);
-    if (!result.ok) {
-      showMessage(result.reason, "error");
-      return;
+    // Try to sign up via server API. Server expects POST to
+    // /activities/{activity_name}/signup with `email` as a query param.
+    try {
+      const url = `/activities/${encodeURIComponent(activityId)}/signup?email=${encodeURIComponent(
+        email
+      )}`;
+      const res = await fetch(url, { method: "POST" });
+      if (!res.ok) {
+        // Try to parse error detail from JSON, otherwise fallback to status
+        let detail = `Failed to sign up (${res.status})`;
+        try {
+          const body = await res.json();
+          if (body && body.detail) detail = body.detail;
+        } catch (e) {
+          /* ignore */
+        }
+        showMessage(detail, "error");
+        return;
+      }
+
+      // Refresh activities from the server so UI shows the new participant
+      await fetchActivitiesFromServer();
+      renderActivities();
+      populateActivitySelect();
+      showMessage("Successfully signed up!", "success");
+      emailInput.value = "";
+      select.value = "";
+    } catch (err) {
+      // Network or other error - fall back to local update so the user still
+      // sees immediate feedback without a hard refresh.
+      console.warn("Signup via server failed, applying local fallback:", err);
+      const result = addParticipantToActivity(activityId, email);
+      if (!result.ok) {
+        showMessage(result.reason, "error");
+        return;
+      }
+      renderActivities();
+      showMessage("Signed up locally (server unavailable)", "success");
+      emailInput.value = "";
+      select.value = "";
     }
-    renderActivities();
-    showMessage("Successfully signed up!", "success");
-    emailInput.value = "";
-    select.value = "";
   }
 
-  // Initialize app
-  renderActivities();
-  populateActivitySelect();
-  const form = document.getElementById("signup-form");
-  if (form) form.addEventListener("submit", handleSignup);
+  // Initialize app: try to load activities from server then wire up UI.
+  async function init() {
+    await fetchActivitiesFromServer();
+    renderActivities();
+    populateActivitySelect();
+    const form = document.getElementById("signup-form");
+    if (form) form.addEventListener("submit", handleSignup);
+  }
+
+  init();
 });
