@@ -16,8 +16,42 @@
       <section id="activities-container">
         <h3>Available Activities</h3>
         <div id="activities-list">
-          <!-- Activities will be loaded here -->
-          <p>Loading activities...</p>
+          <!-- Example activity cards with participants (replace / remove when app.js renders real data) -->
+          <div class="activity-card">
+            <h4>Robotics Club</h4>
+            <p>Build, program, and compete with robots. Meetings: Wednesdays 3:30–5:00pm.</p>
+
+            <div class="participants">
+              <div class="participants-title">Participants</div>
+              <ul class="participants-list">
+                <li>
+                  <span class="participant-avatar">AL</span>
+                  <span class="participant-name">Alice Lopez</span>
+                </li>
+                <li>
+                  <span class="participant-avatar">MJ</span>
+                  <span class="participant-name">Mark Johnson</span>
+                </li>
+                <li>
+                  <span class="participant-avatar">SN</span>
+                  <span class="participant-name">Sana N.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="activity-card">
+            <h4>Art Club</h4>
+            <p>Open studio time for drawing, painting, and portfolio work. Fridays 2:45–4:00pm.</p>
+
+            <div class="participants">
+              <div class="participants-title">Participants</div>
+              <!-- Empty state example -->
+              <div class="participants-empty">No participants yet — be the first to join!</div>
+            </div>
+          </div>
+
+          <!-- ...existing code (dynamic items may be injected by app.js) ... -->
         </div>
       </section>
 

@@ -74,84 +74,36 @@ section h3 {
   margin-bottom: 8px;
 }
 
-/* Participants section styles */
-.activity-card .participants-title {
-  margin-top: 12px;
-  margin-bottom: 8px;
-  font-size: 0.95rem;
-  color: #1a237e;
-  font-weight: 700;
-  letter-spacing: 0.2px;
+.participants {
+  margin-top: 10px;
 }
 
-.activity-card .participants-list {
-  list-style: disc;
-  padding-left: 1.2rem;
-  margin: 0;
+.participants-title {
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
-/* Each participant presented as a gentle pill with avatar and name */
-.activity-card .participants-list li {
+.participants-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.participants-list li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #ffffff 0%, #f3f6ff 100%);
-  border: 1px solid #e6e9fb;
-  box-shadow: 0 1px 0 rgba(12, 18, 60, 0.03);
-  font-size: 0.95rem;
-  color: #21325e;
+  margin-bottom: 5px;
 }
 
-/* Avatar style — supports either <img> or initials in a span */
-.activity-card .participant-avatar {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.78rem;
-  color: #1a237e;
-  background: linear-gradient(180deg, #eaf0ff, #dfe8ff);
-  border: 1px solid #d6def9;
-  box-shadow: 0 1px 0 rgba(12, 18, 60, 0.03);
-}
-
-/* Participant name */
-.activity-card .participant-name {
+.participant-avatar {
   display: inline-block;
-  color: #21325e;
-  line-height: 1;
-}
-
-/* Empty-state when no participants yet */
-.activity-card .participants-empty {
-  margin-top: 8px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background-color: #f1f8ff;
-  color: #0c4a78;
-  border: 1px solid #dbeffd;
-  font-size: 0.95rem;
-}
-
-/* Responsive tweak: on wider screens present participants as inline wrap (badges) */
-@media (min-width: 768px) {
-  .activity-card .participants-list {
-    padding-left: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .activity-card .participants-list li {
-    margin-bottom: 0;
-  }
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #1a237e;
+  color: white;
+  text-align: center;
+  line-height: 24px;
+  margin-right: 10px;
 }
 
 .form-group {
